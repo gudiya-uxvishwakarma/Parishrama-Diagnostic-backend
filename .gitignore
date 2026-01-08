@@ -119,8 +119,7 @@ ehthumbs.db
 Thumbs.db
 
 # Upload directories
-uploads/
-public/uploads/
+
 
 # Database
 *.db
