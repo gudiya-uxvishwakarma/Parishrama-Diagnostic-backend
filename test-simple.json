@@ -1,0 +1,11 @@
+{
+  "name": "Test Patient",
+  "phone": "9876543210",
+  "email": "test@example.com",
+  "address": "Test Address, Delhi",
+  "date": "2024-02-15",
+  "time": "10:30",
+  "service": "laboratory",
+  "category": "hematology",
+  "serviceDetails": "Test appointment"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "John Doe",
+  "phone": "+91 9876543210",
+  "email": "john.doe@example.com",
+  "address": "123 Main Street, New Delhi",
+  "date": "2024-02-15",
+  "time": "10:30",
+  "service": "laboratory",
+  "category": "hematology",
+  "serviceDetails": "Blood test for routine checkup"
+}
