@@ -1,8 +1,7 @@
 import Home from '../models/Home.js';
+import path from "path";
+import fs from "fs";
 
-// @desc    Get all home items
-// @route   GET /api/home
-// @access  Public
 export const getHomeItems = async (req, res) => {
   try {
     const { page = 1, limit = 10, isActive } = req.query;
@@ -39,7 +38,6 @@ export const getHomeItems = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get home items error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching home items'
@@ -47,9 +45,7 @@ export const getHomeItems = async (req, res) => {
   }
 };
 
-// @desc    Get single home item
-// @route   GET /api/home/:id
-// @access  Public
+
 export const getHomeItem = async (req, res) => {
   try {
     const homeItem = await Home.findById(req.params.id);
@@ -67,7 +63,6 @@ export const getHomeItem = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get home item error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching home item'
@@ -80,9 +75,21 @@ export const getHomeItem = async (req, res) => {
 // @access  Private (Admin)
 export const createHomeItem = async (req, res) => {
   try {
-    console.log('Received home item data:', req.body);
-    
-    const { title, text, image, features, isActive } = req.body;
+    let { title, text, image, features, isActive } = req.body;
+
+    // Handle file upload if present
+    if (req.file) {
+      image = `/uploads/home/${req.file.filename}`;
+    }
+
+    // Parse features if it's a JSON string
+    if (typeof features === 'string') {
+      try {
+        features = JSON.parse(features);
+      } catch (e) {
+        features = [features]; // If it's not valid JSON, treat as single feature
+      }
+    }
 
     // Validation
     if (!title || !text || !image || !features || !Array.isArray(features) || features.length === 0) {
@@ -117,8 +124,6 @@ export const createHomeItem = async (req, res) => {
       isActive: isActive !== undefined ? isActive : true
     });
 
-    console.log('Home item created successfully:', homeItem);
-
     res.status(201).json({
       success: true,
       message: 'Home item created successfully',
@@ -126,8 +131,6 @@ export const createHomeItem = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Create home item error:', error);
-    
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
@@ -150,10 +153,7 @@ export const createHomeItem = async (req, res) => {
 // @access  Private (Admin)
 export const updateHomeItem = async (req, res) => {
   try {
-    console.log('Updating home item ID:', req.params.id);
-    console.log('Update data:', req.body);
-    
-    const { title, text, image, features, isActive } = req.body;
+    let { title, text, image, features, isActive } = req.body;
 
     // Check if home item exists
     const existingItem = await Home.findById(req.params.id);
@@ -162,6 +162,31 @@ export const updateHomeItem = async (req, res) => {
         success: false,
         message: 'Home item not found'
       });
+    }
+
+    // Handle file upload if present
+    if (req.file) {
+      image = `/uploads/home/${req.file.filename}`;
+      
+      // Delete old image file if it exists
+      if (existingItem.image && existingItem.image.startsWith('/uploads/')) {
+        const oldImagePath = path.join(process.cwd(), existingItem.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+    } else if (!image) {
+      // If no new file and no image provided, keep the existing image
+      image = existingItem.image;
+    }
+
+    // Parse features if it's a JSON string
+    if (typeof features === 'string') {
+      try {
+        features = JSON.parse(features);
+      } catch (e) {
+        features = [features]; // If it's not valid JSON, treat as single feature
+      }
     }
 
     // Validation
@@ -194,8 +219,6 @@ export const updateHomeItem = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    console.log('Home item updated successfully:', homeItem);
-
     res.json({
       success: true,
       message: 'Home item updated successfully',
@@ -203,8 +226,6 @@ export const updateHomeItem = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update home item error:', error);
-    
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
@@ -250,7 +271,6 @@ export const deleteHomeItem = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Delete home item error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while deleting home item'
@@ -273,7 +293,6 @@ export const getActiveHomeItems = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get active home items error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching active home items'
@@ -302,7 +321,6 @@ export const getHomeStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get home stats error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching home statistics'
@@ -333,7 +351,6 @@ export const searchHomeItems = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Search home items error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while searching home items'

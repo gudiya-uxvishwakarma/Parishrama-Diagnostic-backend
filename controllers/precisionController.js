@@ -1,14 +1,18 @@
 import Precision from '../models/Precision.js';
+import path from "path";
+import fs from "fs";
 
 // @desc    Create new precision
 // @route   POST /api/precision
 // @access  Private (Admin)
 export const createPrecision = async (req, res) => {
   try {
-    console.log('Received data:', req.body);
+    let { image, title, subtitle, description } = req.body;
     
-    // Validate required fields
-    const { image, title, subtitle, description } = req.body;
+    // Handle file upload if present
+    if (req.file) {
+      image = `/uploads/precision/${req.file.filename}`;
+    }
     
     if (!image || !title || !subtitle || !description) {
       return res.status(400).json({
@@ -28,8 +32,6 @@ export const createPrecision = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Create precision error:', error);
-    
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
@@ -81,7 +83,6 @@ export const getPrecisions = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get precisions error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching precisions'
@@ -89,9 +90,7 @@ export const getPrecisions = async (req, res) => {
   }
 };
 
-// @desc    Get single precision
-// @route   GET /api/precision/:id
-// @access  Public
+
 export const getPrecision = async (req, res) => {
   try {
     const precision = await Precision.findById(req.params.id);
@@ -109,7 +108,6 @@ export const getPrecision = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get precision error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching precision'
@@ -117,26 +115,38 @@ export const getPrecision = async (req, res) => {
   }
 };
 
-// @desc    Update precision
-// @route   PUT /api/precision/:id
-// @access  Private (Admin)
+
 export const updatePrecision = async (req, res) => {
   try {
-    console.log('Update data:', req.body);
-    console.log('Update ID:', req.params.id);
-
-    const precision = await Precision.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-
-    if (!precision) {
+    // Check if precision exists
+    const existingPrecision = await Precision.findById(req.params.id);
+    if (!existingPrecision) {
       return res.status(404).json({
         success: false,
         message: 'Precision not found'
       });
     }
+
+    let updateData = { ...req.body };
+    
+    // Handle file upload if present
+    if (req.file) {
+      updateData.image = `/uploads/precision/${req.file.filename}`;
+      
+      // Delete old image file if it exists
+      if (existingPrecision.image && existingPrecision.image.startsWith('/uploads/')) {
+        const oldImagePath = path.join(process.cwd(), existingPrecision.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+    }
+
+    const precision = await Precision.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
 
     res.json({
       success: true,
@@ -145,8 +155,6 @@ export const updatePrecision = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update precision error:', error);
-    
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
@@ -172,9 +180,6 @@ export const updatePrecision = async (req, res) => {
   }
 };
 
-// @desc    Delete precision
-// @route   DELETE /api/precision/:id
-// @access  Private (Admin)
 export const deletePrecision = async (req, res) => {
   try {
     const precision = await Precision.findByIdAndDelete(req.params.id);
@@ -192,7 +197,6 @@ export const deletePrecision = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Delete precision error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while deleting precision'
@@ -227,7 +231,6 @@ export const getPrecisionStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get precision stats error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching precision statistics'
@@ -266,7 +269,6 @@ export const testModelRequirements = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Test model error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while testing model',

@@ -1,4 +1,5 @@
 import express from 'express';
+import { setUploadFolder, uploadSingle } from '../middleware/Upload.js';
 import {
   getAllPackageTests,
   getPackageTestById,
@@ -10,14 +11,22 @@ import {
 
 const router = express.Router();
 
-// Public routes (for frontend display)
+// Get all package tests
 router.get('/', getAllPackageTests);
+
+// Get single package test
 router.get('/:id', getPackageTestById);
 
-// Admin routes (for admin panel management)
-router.post('/', createPackageTest);
-router.put('/:id', updatePackageTest);
+// Create package test with image upload
+router.post('/', setUploadFolder('packageTests'), uploadSingle('image'), createPackageTest);
+
+// Update package test with image upload
+router.put('/:id', setUploadFolder('packageTests'), uploadSingle('image'), updatePackageTest);
+
+// Delete package test
 router.delete('/:id', deletePackageTest);
+
+// Permanent delete package test
 router.delete('/permanent/:id', permanentDeletePackageTest);
 
 export default router;

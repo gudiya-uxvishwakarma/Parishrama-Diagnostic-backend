@@ -1,11 +1,27 @@
 import SampleCollection from '../models/SampleCollection.js';
+import path from "path";
+import fs from "fs";
 
 // @desc    Create new sample collection service
 // @route   POST /api/sampleCollection
 // @access  Private (Admin)
 export const createSampleCollection = async (req, res) => {
   try {
-    const { text, title, image, features, price } = req.body;
+    let { text, title, image, features, price } = req.body;
+
+    // Handle file upload if present
+    if (req.file) {
+      image = `/uploads/sampleCollection/${req.file.filename}`;
+    }
+
+    // Parse features if it's a JSON string
+    if (typeof features === 'string') {
+      try {
+        features = JSON.parse(features);
+      } catch (e) {
+        features = [features];
+      }
+    }
 
     // Validation
     if (!text || !title || !image || !features || features.length === 0 || price === undefined) {
@@ -30,7 +46,6 @@ export const createSampleCollection = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Create sample collection service error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while creating sample collection service'
@@ -71,7 +86,6 @@ export const getSampleCollections = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get sample collection services error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching sample collection services'
@@ -99,7 +113,6 @@ export const getSampleCollection = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get sample collection service error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching sample collection service'
@@ -112,7 +125,40 @@ export const getSampleCollection = async (req, res) => {
 // @access  Private (Admin)
 export const updateSampleCollection = async (req, res) => {
   try {
-    const { text, title, image, features, price } = req.body;
+    // Check if service exists
+    const existingService = await SampleCollection.findById(req.params.id);
+    if (!existingService) {
+      return res.status(404).json({
+        success: false,
+        message: 'Sample collection service not found'
+      });
+    }
+
+    let { text, title, image, features, price } = req.body;
+
+    // Handle file upload if present
+    if (req.file) {
+      image = `/uploads/sampleCollection/${req.file.filename}`;
+      
+      // Delete old image file if it exists
+      if (existingService.image && existingService.image.startsWith('/uploads/')) {
+        const oldImagePath = path.join(process.cwd(), existingService.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+    } else if (!image) {
+      image = existingService.image;
+    }
+
+    // Parse features if it's a JSON string
+    if (typeof features === 'string') {
+      try {
+        features = JSON.parse(features);
+      } catch (e) {
+        features = [features];
+      }
+    }
 
     const updateData = {};
     if (text) updateData.text = text.toUpperCase();
@@ -127,13 +173,6 @@ export const updateSampleCollection = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    if (!service) {
-      return res.status(404).json({
-        success: false,
-        message: 'Sample collection service not found'
-      });
-    }
-
     res.json({
       success: true,
       message: 'Sample collection service updated successfully',
@@ -141,7 +180,6 @@ export const updateSampleCollection = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update sample collection service error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while updating sample collection service'
@@ -170,7 +208,6 @@ export const deleteSampleCollection = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Delete sample collection service error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while deleting sample collection service'
@@ -199,7 +236,6 @@ export const searchSampleCollections = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Search sample collection services error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while searching sample collection services'
@@ -222,7 +258,6 @@ export const getSampleCollectionStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get sample collection stats error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching sample collection statistics'

@@ -15,7 +15,14 @@
     "test-login": "node test-login.js",
     "create-admin": "node create-admin.js"
   },
-  "keywords": ["nodejs", "express", "mongodb", "diagnostic", "laboratory", "api"],
+  "keywords": [
+    "nodejs",
+    "express",
+    "mongodb",
+    "diagnostic",
+    "laboratory",
+    "api"
+  ],
   "author": "Parishrama Diagnostic Laboratory",
   "license": "ISC",
   "dependencies": {

@@ -12,7 +12,6 @@ export const getAllPackageTests = async (req, res) => {
       data: tests
     });
   } catch (error) {
-    console.error('Error fetching package laboratory tests:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch package laboratory tests',
@@ -40,7 +39,6 @@ export const getPackageTestById = async (req, res) => {
       data: test
     });
   } catch (error) {
-    console.error('Error fetching package laboratory test:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch package laboratory test',
@@ -89,8 +87,6 @@ export const createPackageTest = async (req, res) => {
       data: savedTest
     });
   } catch (error) {
-    console.error('Error creating package laboratory test:', error);
-    
     // Handle validation errors
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => err.message);
@@ -161,8 +157,6 @@ export const updatePackageTest = async (req, res) => {
       data: updatedTest
     });
   } catch (error) {
-    console.error('Error updating package laboratory test:', error);
-    
     // Handle validation errors
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => err.message);
@@ -203,7 +197,6 @@ export const deletePackageTest = async (req, res) => {
       message: 'Package laboratory test deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting package laboratory test:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to delete package laboratory test',
@@ -231,7 +224,6 @@ export const permanentDeletePackageTest = async (req, res) => {
       message: 'Package laboratory test permanently deleted'
     });
   } catch (error) {
-    console.error('Error permanently deleting package laboratory test:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to permanently delete package laboratory test',

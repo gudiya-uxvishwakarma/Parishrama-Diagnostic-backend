@@ -5,14 +5,13 @@ const sampleCollectionSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Title is required'],
     trim: true,
-    uppercase: true,
-    maxlength: [50, 'Title cannot be more than 50 characters']
+    maxlength: [100, 'Title cannot be more than 100 characters']
   },
   text: {
     type: String,
     required: [true, 'Text is required'],
     trim: true,
-    maxlength: [200, 'Text cannot be more than 200 characters']
+    maxlength: [300, 'Text cannot be more than 300 characters']
   },
   image: {
     type: String,

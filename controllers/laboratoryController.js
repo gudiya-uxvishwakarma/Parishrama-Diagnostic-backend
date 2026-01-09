@@ -1,13 +1,26 @@
 import Laboratory from '../models/Laboratory.js';
-
+import path from "path";
+import fs from "fs";
 // @desc    Create new laboratory test
 // @route   POST /api/laboratory
 // @access  Private (Admin)
 export const createLaboratoryTest = async (req, res) => {
   try {
-    console.log('Received laboratory test data:', req.body);
+    let { title, text, image, features, price } = req.body;
     
-    const { title, text, image, features, price } = req.body;
+    // Handle file upload if present
+    if (req.file) {
+      image = `/uploads/laboratory/${req.file.filename}`;
+    }
+
+    // Parse features if it's a JSON string
+    if (typeof features === 'string') {
+      try {
+        features = JSON.parse(features);
+      } catch (e) {
+        features = [features]; // If it's not valid JSON, treat as single feature
+      }
+    }
     
     // Validate required fields
     if (!title || !text || !image) {
@@ -32,11 +45,7 @@ export const createLaboratoryTest = async (req, res) => {
       price: price ? parseFloat(price) : undefined
     };
     
-    console.log('Creating laboratory test with processed data:', labTestData);
-    
     const labTest = await Laboratory.create(labTestData);
-    
-    console.log('Laboratory test created successfully:', labTest);
 
     res.status(201).json({
       success: true,
@@ -45,8 +54,6 @@ export const createLaboratoryTest = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Create laboratory test error:', error);
-    
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
@@ -107,7 +114,6 @@ export const getLaboratoryTests = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get laboratory tests error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching laboratory tests'
@@ -135,7 +141,6 @@ export const getLaboratoryTest = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get laboratory test error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching laboratory test'
@@ -148,10 +153,7 @@ export const getLaboratoryTest = async (req, res) => {
 // @access  Private (Admin)
 export const updateLaboratoryTest = async (req, res) => {
   try {
-    console.log('Updating laboratory test ID:', req.params.id);
-    console.log('Update data:', req.body);
-    
-    const { title, text, image, features, price } = req.body;
+    let { title, text, image, features, price } = req.body;
     
     // Check if laboratory test exists
     const existingTest = await Laboratory.findById(req.params.id);
@@ -160,6 +162,31 @@ export const updateLaboratoryTest = async (req, res) => {
         success: false,
         message: 'Laboratory test not found'
       });
+    }
+    
+    // Handle file upload if present
+    if (req.file) {
+      image = `/uploads/laboratory/${req.file.filename}`;
+      
+      // Delete old image file if it exists
+      if (existingTest.image && existingTest.image.startsWith('/uploads/')) {
+        const oldImagePath = path.join(process.cwd(), existingTest.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+    } else if (!image) {
+      // If no new file and no image provided, keep the existing image
+      image = existingTest.image;
+    }
+
+    // Parse features if it's a JSON string
+    if (typeof features === 'string') {
+      try {
+        features = JSON.parse(features);
+      } catch (e) {
+        features = [features]; // If it's not valid JSON, treat as single feature
+      }
     }
     
     // Validate required fields
@@ -184,8 +211,6 @@ export const updateLaboratoryTest = async (req, res) => {
       updateData,
       { new: true, runValidators: true }
     );
-    
-    console.log('Laboratory test updated successfully:', labTest);
 
     res.json({
       success: true,
@@ -194,8 +219,6 @@ export const updateLaboratoryTest = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update laboratory test error:', error);
-    
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
@@ -241,7 +264,6 @@ export const deleteLaboratoryTest = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Delete laboratory test error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while deleting laboratory test'
@@ -270,7 +292,6 @@ export const searchLaboratoryTests = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Search laboratory tests error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while searching laboratory tests'
@@ -299,7 +320,6 @@ export const getLaboratoryStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get laboratory stats error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching laboratory statistics'

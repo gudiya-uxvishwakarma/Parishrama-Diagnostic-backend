@@ -1,4 +1,6 @@
 import express from 'express';
+import multer from 'multer';
+import fs from 'fs';
 import {
   createLaboratoryTest,
   getLaboratoryTests,
@@ -11,39 +13,31 @@ import {
 
 const router = express.Router();
 
-// @route   POST /api/laboratory
-// @desc    Create new laboratory test
-// @access  Private (Admin)
-router.post('/', createLaboratoryTest);
+// Multer setup for file upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = "uploads/laboratory/";
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + "_" + file.originalname;
+    cb(null, uniqueName);
+  },
+});
 
-// @route   GET /api/laboratory/stats
-// @desc    Get laboratory statistics
-// @access  Private (Admin)
+const upload = multer({ storage: storage });
+
+// Routes
 router.get('/stats', getLaboratoryStats);
-
-// @route   GET /api/laboratory/search/:query
-// @desc    Search laboratory tests
-// @access  Public
 router.get('/search/:query', searchLaboratoryTests);
-
-// @route   GET /api/laboratory
-// @desc    Get all laboratory tests
-// @access  Public
 router.get('/', getLaboratoryTests);
-
-// @route   GET /api/laboratory/:id
-// @desc    Get single laboratory test
-// @access  Public
 router.get('/:id', getLaboratoryTest);
-
-// @route   PUT /api/laboratory/:id
-// @desc    Update laboratory test
-// @access  Private (Admin)
-router.put('/:id', updateLaboratoryTest);
-
-// @route   DELETE /api/laboratory/:id
-// @desc    Delete laboratory test
-// @access  Private (Admin)
+router.post('/', upload.single('image'), createLaboratoryTest);
+router.put('/:id', upload.single('image'), updateLaboratoryTest);
 router.delete('/:id', deleteLaboratoryTest);
 
 export default router;

@@ -1,4 +1,6 @@
 import Doctor from "../models/Doctor.js";
+import path from "path";
+import fs from "fs";
 
 /**
  * @desc    Create Doctor
@@ -6,7 +8,14 @@ import Doctor from "../models/Doctor.js";
  */
 export const createDoctor = async (req, res) => {
   try {
-    const doctor = await Doctor.create(req.body);
+    let doctorData = { ...req.body };
+    
+    // Handle file upload if present
+    if (req.file) {
+      doctorData.image = `/uploads/doctors/${req.file.filename}`;
+    }
+
+    const doctor = await Doctor.create(doctorData);
 
     res.status(201).json({
       success: true,
@@ -76,18 +85,35 @@ export const getDoctorById = async (req, res) => {
  */
 export const updateDoctor = async (req, res) => {
   try {
-    const doctor = await Doctor.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-
-    if (!doctor) {
+    // Check if doctor exists
+    const existingDoctor = await Doctor.findById(req.params.id);
+    if (!existingDoctor) {
       return res.status(404).json({
         success: false,
         message: "Doctor not found"
       });
     }
+
+    let updateData = { ...req.body };
+    
+    // Handle file upload if present
+    if (req.file) {
+      updateData.image = `/uploads/doctors/${req.file.filename}`;
+      
+      // Delete old image file if it exists
+      if (existingDoctor.image && existingDoctor.image.startsWith('/uploads/')) {
+        const oldImagePath = path.join(process.cwd(), existingDoctor.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+    }
+
+    const doctor = await Doctor.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
 
     res.status(200).json({
       success: true,

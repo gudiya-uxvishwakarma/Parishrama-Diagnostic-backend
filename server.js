@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 // Database connection
 import connectDB from "./config/db.js";
@@ -27,6 +28,30 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Create upload directories if they don't exist
+const createUploadDirs = () => {
+  const uploadDirs = [
+    'uploads',
+    'uploads/home',
+    'uploads/laboratory',
+    'uploads/doctors',
+    'uploads/sampleCollection',
+    'uploads/precision',
+    'uploads/appointment'
+  ];
+
+  uploadDirs.forEach(dir => {
+    const dirPath = path.join(__dirname, dir);
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+      console.log(`📁 Created directory: ${dir}`);
+    }
+  });
+};
+
+// Create upload directories
+createUploadDirs();
+
 // Middlewares
 app.use(cors());
 app.use(express.json({ limit: "10mb" })); // Image upload ke liye limit badhao
@@ -39,7 +64,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/uploads/home", express.static(path.join(__dirname, "uploads/home")));
 app.use("/uploads/laboratory", express.static(path.join(__dirname, "uploads/laboratory")));
 app.use("/uploads/doctors", express.static(path.join(__dirname, "uploads/doctors")));
-app.use("/uploads/samplecollection", express.static(path.join(__dirname, "uploads/samplecollection")));
+app.use("/uploads/sampleCollection", express.static(path.join(__dirname, "uploads/sampleCollection")));
+app.use("/uploads/precision", express.static(path.join(__dirname, "uploads/precision")));
 app.use("/uploads/appointment", express.static(path.join(__dirname, "uploads/appointment")));
 
 // ==================== API ROUTES ====================
@@ -56,7 +82,7 @@ app.use("/api/precision", precisionRoutes);
 // ==================== ROOT ROUTE (Health Check) ====================
 app.get("/", (req, res) => {
   res.json({
-    message: "Parishrama Backend API is running! 🚀",
+    message: "Parishrama Backend API is running! ",
     status: "healthy",
     timestamp: new Date().toISOString(),
     version: "1.0.0"
@@ -69,7 +95,7 @@ connectDB();
 // ==================== Server Start ====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
+  console.log(` Server running on http://localhost:${PORT}`);
+  console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(` API Base URL: http://localhost:${PORT}/api`);
 });

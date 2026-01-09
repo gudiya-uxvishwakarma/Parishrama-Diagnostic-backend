@@ -55,7 +55,6 @@ export const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Login error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error during login'
@@ -107,7 +106,6 @@ export const register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error during registration'
@@ -151,7 +149,6 @@ export const verifyToken = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Token verification error:', error);
     res.status(401).json({
       success: false,
       message: 'Token is not valid'
@@ -169,7 +166,6 @@ export const logout = async (req, res) => {
       message: 'Logged out successfully. Please remove token from client.'
     });
   } catch (error) {
-    console.error('Logout error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error during logout'

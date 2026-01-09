@@ -1,4 +1,6 @@
 import express from 'express';
+import multer from 'multer';
+import fs from 'fs';
 import {
   createPrecision,
   getPrecisions,
@@ -11,39 +13,31 @@ import {
 
 const router = express.Router();
 
-// @route   GET /api/precision/test/model
-// @desc    Test model requirements
-// @access  Public
+// Multer setup for file upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = "uploads/precision/";
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + "_" + file.originalname;
+    cb(null, uniqueName);
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// Routes
 router.get('/test/model', testModelRequirements);
-
-// @route   GET /api/precision/stats/overview
-// @desc    Get precision statistics
-// @access  Private (Admin)
 router.get('/stats/overview', getPrecisionStats);
-
-// @route   POST /api/precision
-// @desc    Create new precision
-// @access  Private (Admin)
-router.post('/', createPrecision);
-
-// @route   GET /api/precision
-// @desc    Get all precisions
-// @access  Public
 router.get('/', getPrecisions);
-
-// @route   GET /api/precision/:id
-// @desc    Get single precision
-// @access  Public
 router.get('/:id', getPrecision);
-
-// @route   PUT /api/precision/:id
-// @desc    Update precision
-// @access  Private (Admin)
-router.put('/:id', updatePrecision);
-
-// @route   DELETE /api/precision/:id
-// @desc    Delete precision
-// @access  Private (Admin)
+router.post('/', upload.single('image'), createPrecision);
+router.put('/:id', upload.single('image'), updatePrecision);
 router.delete('/:id', deletePrecision);
 
 export default router;

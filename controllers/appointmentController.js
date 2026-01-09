@@ -5,11 +5,6 @@ import Appointment from '../models/Appointment.js';
 // @access  Public
 export const createAppointment = async (req, res) => {
   try {
-    console.log('=== NEW APPOINTMENT REQUEST ===');
-    console.log('Received appointment data:', req.body);
-    console.log('Request method:', req.method);
-    console.log('Request headers:', req.headers);
-    
     const appointmentData = req.body;
 
     // Validate required fields
@@ -17,7 +12,6 @@ export const createAppointment = async (req, res) => {
     const missingFields = requiredFields.filter(field => !appointmentData[field] || appointmentData[field].trim() === '');
     
     if (missingFields.length > 0) {
-      console.log('❌ Missing fields:', missingFields);
       return res.status(400).json({
         success: false,
         message: `Missing required fields: ${missingFields.join(', ')}`,
@@ -28,7 +22,6 @@ export const createAppointment = async (req, res) => {
     // Validate email format
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
     if (!emailRegex.test(appointmentData.email)) {
-      console.log('❌ Invalid email format:', appointmentData.email);
       return res.status(400).json({
         success: false,
         message: 'Please enter a valid email address'
@@ -38,14 +31,11 @@ export const createAppointment = async (req, res) => {
     // Validate date format
     const appointmentDate = new Date(appointmentData.date);
     if (isNaN(appointmentDate.getTime())) {
-      console.log('❌ Invalid date format:', appointmentData.date);
       return res.status(400).json({
         success: false,
         message: 'Please enter a valid date'
       });
     }
-
-    console.log('✅ All validations passed');
 
     // Check for duplicate appointment (same email, date, time)
     const existingAppointment = await Appointment.findOne({
@@ -55,18 +45,14 @@ export const createAppointment = async (req, res) => {
     });
 
     if (existingAppointment) {
-      console.log('❌ Duplicate appointment found:', existingAppointment._id);
       return res.status(400).json({
         success: false,
         message: 'An appointment already exists for this time slot'
       });
     }
 
-    console.log('✅ No duplicate found, creating appointment...');
-
     // Create appointment
     const appointment = await Appointment.create(appointmentData);
-    console.log('✅ Appointment created successfully:', appointment._id);
 
     res.status(201).json({
       success: true,
@@ -75,12 +61,9 @@ export const createAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Create appointment error:', error);
-    
     // Handle validation errors
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => err.message);
-      console.log('❌ Validation errors:', validationErrors);
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -91,7 +74,6 @@ export const createAppointment = async (req, res) => {
 
     // Handle duplicate key errors
     if (error.code === 11000) {
-      console.log('❌ Duplicate key error:', error.keyValue);
       return res.status(400).json({
         success: false,
         message: 'Duplicate entry found',
@@ -151,7 +133,6 @@ export const getAppointments = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get appointments error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching appointments',
@@ -180,8 +161,6 @@ export const getAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get appointment error:', error);
-    
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
@@ -222,8 +201,6 @@ export const updateAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update appointment error:', error);
-    
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
@@ -269,8 +246,6 @@ export const deleteAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Delete appointment error:', error);
-    
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
@@ -339,7 +314,6 @@ export const getAppointmentStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get stats error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching statistics',
@@ -373,7 +347,6 @@ export const searchAppointments = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Search appointments error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while searching appointments',
@@ -420,7 +393,6 @@ export const getAppointmentsByCategory = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get appointments by category error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching appointments by category',
@@ -467,7 +439,6 @@ export const getCategories = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get categories error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching categories',
@@ -510,7 +481,6 @@ export const getCategoryStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get category stats error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching category statistics',
