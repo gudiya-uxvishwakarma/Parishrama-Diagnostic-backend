@@ -1,4 +1,6 @@
 import PackageLaboratoryTest from '../models/PackageLaboratoryTest.js';
+import path from "path";
+import fs from "fs";
 
 // Get all package laboratory tests
 export const getAllPackageTests = async (req, res) => {
@@ -50,7 +52,21 @@ export const getPackageTestById = async (req, res) => {
 // Create new package laboratory test
 export const createPackageTest = async (req, res) => {
   try {
-    const { title, text, description, features, price } = req.body;
+    let { title, text, description, features, price, image } = req.body;
+    
+    // Handle file upload if present
+    if (req.file) {
+      image = `/uploads/packageTests/${req.file.filename}`;
+    }
+    
+    // Parse features if it's a JSON string
+    if (typeof features === 'string') {
+      try {
+        features = JSON.parse(features);
+      } catch (e) {
+        features = [features]; // If it's not valid JSON, treat as single feature
+      }
+    }
     
     // Validate required fields
     if (!title || !text || !description || !features || !Array.isArray(features) || features.length === 0) {
@@ -76,7 +92,8 @@ export const createPackageTest = async (req, res) => {
       text: text.trim(),
       description: description.trim(),
       features: cleanFeatures,
-      price: price ? parseFloat(price) : null
+      price: price ? parseFloat(price) : null,
+      image: image || null
     });
     
     const savedTest = await newTest.save();
@@ -109,7 +126,7 @@ export const createPackageTest = async (req, res) => {
 export const updatePackageTest = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, text, description, features, price } = req.body;
+    let { title, text, description, features, price, image } = req.body;
     
     // Check if test exists
     const existingTest = await PackageLaboratoryTest.findById(id);
@@ -118,6 +135,31 @@ export const updatePackageTest = async (req, res) => {
         success: false,
         message: 'Package laboratory test not found'
       });
+    }
+    
+    // Handle file upload if present
+    if (req.file) {
+      image = `/uploads/packageTests/${req.file.filename}`;
+      
+      // Delete old image file if it exists
+      if (existingTest.image && existingTest.image.startsWith('/uploads/')) {
+        const oldImagePath = path.join(process.cwd(), existingTest.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+    } else if (!image) {
+      // If no new file and no image provided, keep the existing image
+      image = existingTest.image;
+    }
+    
+    // Parse features if it's a JSON string
+    if (typeof features === 'string') {
+      try {
+        features = JSON.parse(features);
+      } catch (e) {
+        features = [features]; // If it's not valid JSON, treat as single feature
+      }
     }
     
     // Validate required fields
@@ -146,7 +188,8 @@ export const updatePackageTest = async (req, res) => {
         text: text.trim(),
         description: description.trim(),
         features: cleanFeatures,
-        price: price ? parseFloat(price) : null
+        price: price ? parseFloat(price) : null,
+        image: image || null
       },
       { new: true, runValidators: true }
     );
