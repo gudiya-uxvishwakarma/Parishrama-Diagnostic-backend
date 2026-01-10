@@ -55,8 +55,13 @@ createUploadDirs();
 
 // Middlewares
 app.use(cors());
-app.use(express.json({ limit: "10mb" })); // Image upload ke liye limit badhao
-app.use(express.urlencoded({ extended: true })); // Form data ke liye useful
+
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`📝 ${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
 
 // ==================== STATIC FILES (Uploads) ====================
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -84,10 +89,18 @@ app.use("/api/precision", precisionRoutes);
 // ==================== ROOT ROUTE (Health Check) ====================
 app.get("/", (req, res) => {
   res.json({
-    message: "Parishrama Backend API is running! ",
+    message: "Parishrama Backend API is running! "
+  });
+});
+
+// ==================== API HEALTH CHECK ====================
+app.get("/api/health", (req, res) => {
+  res.json({
     status: "healthy",
+    message: "API is working correctly",
     timestamp: new Date().toISOString(),
-    version: "1.0.0"
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 

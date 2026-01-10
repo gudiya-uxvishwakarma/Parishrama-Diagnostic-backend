@@ -4,6 +4,7 @@ import fs from "fs";
 
 export const getHomeItems = async (req, res) => {
   try {
+    console.log('📋 GET /api/home - Fetching home items...');
     const { page = 1, limit = 10, isActive } = req.query;
     
     // Build filter object
@@ -24,6 +25,8 @@ export const getHomeItems = async (req, res) => {
     // Get total count for pagination
     const total = await Home.countDocuments(filter);
 
+    console.log(`✅ Found ${homeItems.length} home items out of ${total} total`);
+
     res.json({
       success: true,
       count: homeItems.length,
@@ -38,9 +41,12 @@ export const getHomeItems = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('❌ Error in getHomeItems:', error.message);
+    console.error('❌ Stack trace:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching home items'
+      message: 'Server error while fetching home items',
+      error: error.message
     });
   }
 };

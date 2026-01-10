@@ -55,6 +55,7 @@ export const createPrecision = async (req, res) => {
 // @access  Public
 export const getPrecisions = async (req, res) => {
   try {
+    console.log('🎯 GET /api/precision - Fetching precision sections...');
     const { isActive, page = 1, limit = 10 } = req.query;
     
     const filter = {};
@@ -70,6 +71,8 @@ export const getPrecisions = async (req, res) => {
 
     const total = await Precision.countDocuments(filter);
 
+    console.log(`✅ Found ${precisions.length} precision sections out of ${total} total`);
+
     res.json({
       success: true,
       count: precisions.length,
@@ -83,9 +86,12 @@ export const getPrecisions = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('❌ Error in getPrecisions:', error.message);
+    console.error('❌ Stack trace:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching precisions'
+      message: 'Server error while fetching precisions',
+      error: error.message
     });
   }
 };

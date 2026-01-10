@@ -86,6 +86,7 @@ export const createLaboratoryTest = async (req, res) => {
 // @access  Public
 export const getLaboratoryTests = async (req, res) => {
   try {
+    console.log('🧪 GET /api/laboratory - Fetching laboratory tests...');
     const { page = 1, limit = 10 } = req.query;
     
     // Calculate pagination
@@ -99,6 +100,8 @@ export const getLaboratoryTests = async (req, res) => {
 
     // Get total count for pagination
     const total = await Laboratory.countDocuments({});
+
+    console.log(`✅ Found ${labTests.length} laboratory tests out of ${total} total`);
 
     res.json({
       success: true,
@@ -114,9 +117,12 @@ export const getLaboratoryTests = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('❌ Error in getLaboratoryTests:', error.message);
+    console.error('❌ Stack trace:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching laboratory tests'
+      message: 'Server error while fetching laboratory tests',
+      error: error.message
     });
   }
 };
