@@ -30,17 +30,40 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Middleware to handle both JSON and multipart data
+const handleOptionalUpload = (req, res, next) => {
+  const contentType = req.get('Content-Type');
+  
+  if (contentType && contentType.includes('multipart/form-data')) {
+    // Use multer for multipart data
+    upload.single('image')(req, res, (err) => {
+      if (err) {
+        console.error('Multer error:', err);
+        return res.status(400).json({
+          success: false,
+          message: 'File upload error',
+          error: err.message
+        });
+      }
+      next();
+    });
+  } else {
+    // Skip multer for JSON data
+    next();
+  }
+};
+
 // Get all package tests
 router.get('/', getAllPackageTests);
 
 // Get single package test
 router.get('/:id', getPackageTestById);
 
-// Create package test with image upload
-router.post('/', upload.single('image'), createPackageTest);
+// Create package test (handles both JSON and multipart)
+router.post('/', handleOptionalUpload, createPackageTest);
 
-// Update package test with image upload
-router.put('/:id', upload.single('image'), updatePackageTest);
+// Update package test (handles both JSON and multipart)
+router.put('/:id', handleOptionalUpload, updatePackageTest);
 
 // Delete package test
 router.delete('/:id', deletePackageTest);

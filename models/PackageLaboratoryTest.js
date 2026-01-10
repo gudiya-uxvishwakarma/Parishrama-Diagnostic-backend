@@ -31,6 +31,11 @@ const packageLaboratoryTestSchema = new mongoose.Schema({
     min: [0, 'Price must be a positive number'],
     default: null
   },
+  image: {
+    type: String,
+    trim: true,
+    default: null
+  },
   isActive: {
     type: Boolean,
     default: true

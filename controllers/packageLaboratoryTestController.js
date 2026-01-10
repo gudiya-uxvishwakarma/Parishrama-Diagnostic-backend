@@ -72,7 +72,8 @@ export const createPackageTest = async (req, res) => {
     if (!title || !text || !description || !features || !Array.isArray(features) || features.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Title, text, description, and at least one feature are required'
+        message: 'Title, text, description, and at least one feature are required',
+        received: { title, text, description, features, price, image }
       });
     }
     
@@ -87,15 +88,16 @@ export const createPackageTest = async (req, res) => {
     }
     
     // Create new package test
-    const newTest = new PackageLaboratoryTest({
+    const testData = {
       title: title.trim(),
       text: text.trim(),
       description: description.trim(),
       features: cleanFeatures,
       price: price ? parseFloat(price) : null,
       image: image || null
-    });
+    };
     
+    const newTest = new PackageLaboratoryTest(testData);
     const savedTest = await newTest.save();
     
     res.status(201).json({
@@ -104,6 +106,8 @@ export const createPackageTest = async (req, res) => {
       data: savedTest
     });
   } catch (error) {
+    console.error('Error in createPackageTest:', error);
+    
     // Handle validation errors
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => err.message);
@@ -166,7 +170,8 @@ export const updatePackageTest = async (req, res) => {
     if (!title || !text || !description || !features || !Array.isArray(features) || features.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Title, text, description, and at least one feature are required'
+        message: 'Title, text, description, and at least one feature are required',
+        received: { title, text, description, features, price, image }
       });
     }
     
@@ -181,16 +186,18 @@ export const updatePackageTest = async (req, res) => {
     }
     
     // Update the test
+    const updateData = {
+      title: title.trim(),
+      text: text.trim(),
+      description: description.trim(),
+      features: cleanFeatures,
+      price: price ? parseFloat(price) : null,
+      image: image || null
+    };
+    
     const updatedTest = await PackageLaboratoryTest.findByIdAndUpdate(
       id,
-      {
-        title: title.trim(),
-        text: text.trim(),
-        description: description.trim(),
-        features: cleanFeatures,
-        price: price ? parseFloat(price) : null,
-        image: image || null
-      },
+      updateData,
       { new: true, runValidators: true }
     );
     
@@ -200,6 +207,8 @@ export const updatePackageTest = async (req, res) => {
       data: updatedTest
     });
   } catch (error) {
+    console.error('Error in updatePackageTest:', error);
+    
     // Handle validation errors
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => err.message);

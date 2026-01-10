@@ -7,23 +7,56 @@ import fs from "fs";
 // @access  Private (Admin)
 export const createPrecision = async (req, res) => {
   try {
-    let { image, title, subtitle, description } = req.body;
+    console.log('🎯 CREATE PRECISION - Request received');
+    console.log('📋 Content-Type:', req.get('Content-Type'));
+    console.log('📦 req.body:', req.body);
+    console.log('📁 req.file:', req.file);
+    
+    let { title, subtitle, description } = req.body;
+    let image = null;
     
     // Handle file upload if present
     if (req.file) {
       image = `/uploads/precision/${req.file.filename}`;
+      console.log('📸 File uploaded, image path set to:', image);
     }
     
-    if (!image || !title || !subtitle || !description) {
+    console.log('✅ Final values before validation:');
+    console.log('  - image:', image);
+    console.log('  - title:', title);
+    console.log('  - subtitle:', subtitle);
+    console.log('  - description:', description);
+    
+    // Validate required fields
+    if (!title || !subtitle || !description) {
+      console.log('❌ Validation failed - missing text fields');
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields',
-        required: ['image', 'title', 'subtitle', 'description'],
-        received: Object.keys(req.body)
+        message: 'Title, subtitle, and description are required',
+        received: { title, subtitle, description }
       });
     }
 
-    const precision = await Precision.create(req.body);
+    if (!image) {
+      console.log('❌ Validation failed - no image provided');
+      return res.status(400).json({
+        success: false,
+        message: 'Image file is required',
+        received: { hasFile: !!req.file }
+      });
+    }
+
+    // Create precision with processed data
+    const precisionData = {
+      image,
+      title: title.trim(),
+      subtitle: subtitle.trim(),
+      description: description.trim(),
+      isActive: true
+    };
+
+    console.log('🚀 Creating precision with data:', precisionData);
+    const precision = await Precision.create(precisionData);
 
     res.status(201).json({
       success: true,
