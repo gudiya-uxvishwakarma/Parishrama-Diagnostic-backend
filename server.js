@@ -11,9 +11,8 @@ import connectDB from "./config/db.js";
 // Route imports
 import homeRoutes from "./routes/homeRoutes.js";
 import laboratoryRoutes from "./routes/laboratoryRoutes.js";
-import packageLaboratoryTestRoutes from "./routes/packageLaboratoryTestRoutes.js";
 import doctorRoutes from "./routes/doctorRoutes.js";
-import sampleCollectionRoutes from "./routes/sampleCollectionRoutes.js";
+import healthCheckupRoutes from "./routes/healthCheckupRoutes.js";
 import appointmentsRoutes from "./routes/appointmentsRoutes.js";
 import loginRoutes from "./routes/loginRoutes.js";
 import precisionRoutes from "./routes/precisionRoutes.js";
@@ -35,7 +34,7 @@ const createUploadDirs = () => {
     'uploads/home',
     'uploads/laboratory',
     'uploads/doctors',
-    'uploads/sampleCollection',
+    'uploads/healthCheckup',
     'uploads/precision',
     'uploads/appointment',
     'uploads/packageTests'
@@ -74,7 +73,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/uploads/home", express.static(path.join(__dirname, "uploads/home")));
 app.use("/uploads/laboratory", express.static(path.join(__dirname, "uploads/laboratory")));
 app.use("/uploads/doctors", express.static(path.join(__dirname, "uploads/doctors")));
-app.use("/uploads/sampleCollection", express.static(path.join(__dirname, "uploads/sampleCollection")));
+app.use("/uploads/healthCheckup", express.static(path.join(__dirname, "uploads/healthCheckup")));
 app.use("/uploads/precision", express.static(path.join(__dirname, "uploads/precision")));
 app.use("/uploads/appointment", express.static(path.join(__dirname, "uploads/appointment")));
 app.use("/uploads/packageTests", express.static(path.join(__dirname, "uploads/packageTests")));
@@ -82,9 +81,8 @@ app.use("/uploads/packageTests", express.static(path.join(__dirname, "uploads/pa
 // ==================== API ROUTES ====================
 app.use("/api/home", homeRoutes);
 app.use("/api/laboratory", laboratoryRoutes);
-app.use("/api/package-laboratory-test", packageLaboratoryTestRoutes);
 app.use("/api/doctor", doctorRoutes);
-app.use("/api/sampleCollection", sampleCollectionRoutes);
+app.use("/api/healthCheckup", healthCheckupRoutes);
 app.use("/api/appointments", appointmentsRoutes);
 app.use("/api/login", loginRoutes);
 app.use("/api/precision", precisionRoutes);
