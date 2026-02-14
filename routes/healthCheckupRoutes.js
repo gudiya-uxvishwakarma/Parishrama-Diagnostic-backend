@@ -9,7 +9,7 @@ import {
   deleteHealthCheckup,
   searchHealthCheckups,
   getHealthCheckupStats
-} from '../controllers/HealthCheckupController.js';
+} from '../controllers/healthCheckupController.js';
 
 const router = express.Router();
 
