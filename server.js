@@ -37,7 +37,8 @@ const createUploadDirs = () => {
     'uploads/healthCheckup',
     'uploads/precision',
     'uploads/appointment',
-    'uploads/packageTests'
+    'uploads/packageTests',
+    'uploads/reports'
   ];
 
   uploadDirs.forEach(dir => {
@@ -82,6 +83,7 @@ app.use("/uploads/healthCheckup", express.static(path.join(__dirname, "uploads/h
 app.use("/uploads/precision", express.static(path.join(__dirname, "uploads/precision")));
 app.use("/uploads/appointment", express.static(path.join(__dirname, "uploads/appointment")));
 app.use("/uploads/packageTests", express.static(path.join(__dirname, "uploads/packageTests")));
+app.use("/uploads/reports", express.static(path.join(__dirname, "uploads/reports")));
 
 // ==================== API ROUTES ====================
 app.use("/api/home", homeRoutes);

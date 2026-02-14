@@ -53,6 +53,14 @@ const appointmentSchema = new mongoose.Schema({
     maxlength: [500, 'Service details cannot be more than 500 characters'],
     default: ''
   },
+  pdfReport: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  pdfUploadDate: {
+    type: Date
+  },
   createdAt: {
     type: Date,
     default: Date.now

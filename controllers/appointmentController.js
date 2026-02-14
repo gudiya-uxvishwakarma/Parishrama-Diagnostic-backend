@@ -1,4 +1,6 @@
 import Appointment from '../models/Appointment.js';
+import path from 'path';
+import fs from 'fs';
 
 // @desc    Create new appointment
 // @route   POST /api/appointments
@@ -484,6 +486,179 @@ export const getCategoryStats = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error while fetching category statistics',
+      error: error.message
+    });
+  }
+};
+
+
+// @desc    Upload PDF report for appointment
+// @route   POST /api/appointments/:id/upload-report
+// @access  Private (Admin)
+export const uploadPdfReport = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please upload a PDF file'
+      });
+    }
+
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Appointment not found'
+      });
+    }
+
+    // Update appointment with PDF report path
+    appointment.pdfReport = req.file.filename;
+    appointment.pdfUploadDate = new Date();
+    await appointment.save();
+
+    res.json({
+      success: true,
+      message: 'PDF report uploaded successfully',
+      data: {
+        filename: req.file.filename,
+        path: req.file.path,
+        uploadDate: appointment.pdfUploadDate
+      }
+    });
+
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid appointment ID'
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error while uploading PDF report',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Download PDF report
+// @route   GET /api/appointments/:id/download-report
+// @access  Public
+export const downloadPdfReport = async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Appointment not found'
+      });
+    }
+
+    if (!appointment.pdfReport) {
+      return res.status(404).json({
+        success: false,
+        message: 'No PDF report found for this appointment'
+      });
+    }
+
+    const filePath = path.join(process.cwd(), 'uploads', 'reports', appointment.pdfReport);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'PDF file not found on server'
+      });
+    }
+
+    // Set headers for download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${appointment.name}-report.pdf"`);
+    
+    // Send file
+    res.sendFile(filePath);
+
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid appointment ID'
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error while downloading PDF report',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Send report via email with PDF attachment
+// @route   POST /api/appointments/:id/send-email
+// @access  Private (Admin)
+export const sendReportViaEmail = async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Appointment not found'
+      });
+    }
+
+    if (!appointment.pdfReport) {
+      return res.status(400).json({
+        success: false,
+        message: 'No PDF report found for this appointment. Please upload a PDF first.'
+      });
+    }
+
+    const pdfPath = path.join(process.cwd(), 'uploads', 'reports', appointment.pdfReport);
+
+    // Check if PDF file exists
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'PDF file not found on server'
+      });
+    }
+
+    // Import email service dynamically
+    const { sendReportEmail } = await import('../services/emailService.js');
+    
+    const result = await sendReportEmail(appointment, pdfPath);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Email sent successfully with PDF attachment',
+        messageId: result.messageId
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to send email',
+        error: result.error
+      });
+    }
+
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid appointment ID'
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error while sending email',
       error: error.message
     });
   }
