@@ -16,6 +16,12 @@ import healthCheckupRoutes from "./routes/healthCheckupRoutes.js";
 import appointmentsRoutes from "./routes/appointmentsRoutes.js";
 import loginRoutes from "./routes/loginRoutes.js";
 import precisionRoutes from "./routes/precisionRoutes.js";
+import homeSampleCollectionRoutes from "./routes/homeSampleCollectionRoutes.js";
+import homeSampleBookingRoutes from "./routes/homeSampleBookingRoutes.js";
+import branchRoutes from "./routes/branchRoutes.js";
+import aboutLaboratoryRoutes from "./routes/aboutLaboratoryRoutes.js";
+import laboratoryImageRoutes from "./routes/laboratoryImageRoutes.js";
+import offerRoutes from "./routes/offerRoutes.js";
 
 
 // Load environment variables
@@ -38,7 +44,10 @@ const createUploadDirs = () => {
     'uploads/precision',
     'uploads/appointment',
     'uploads/packageTests',
-    'uploads/reports'
+    'uploads/reports',
+    'uploads/aboutLaboratory',
+    'uploads/laboratoryImages',
+    'uploads/offers'
   ];
 
   uploadDirs.forEach(dir => {
@@ -84,6 +93,9 @@ app.use("/uploads/precision", express.static(path.join(__dirname, "uploads/preci
 app.use("/uploads/appointment", express.static(path.join(__dirname, "uploads/appointment")));
 app.use("/uploads/packageTests", express.static(path.join(__dirname, "uploads/packageTests")));
 app.use("/uploads/reports", express.static(path.join(__dirname, "uploads/reports")));
+app.use("/uploads/aboutLaboratory", express.static(path.join(__dirname, "uploads/aboutLaboratory")));
+app.use("/uploads/laboratoryImages", express.static(path.join(__dirname, "uploads/laboratoryImages")));
+app.use("/uploads/offers", express.static(path.join(__dirname, "uploads/offers")));
 
 // ==================== API ROUTES ====================
 app.use("/api/home", homeRoutes);
@@ -93,6 +105,17 @@ app.use("/api/healthCheckup", healthCheckupRoutes);
 app.use("/api/appointments", appointmentsRoutes);
 app.use("/api/login", loginRoutes);
 app.use("/api/precision", precisionRoutes);
+app.use("/api/homeSampleCollection", homeSampleCollectionRoutes);
+app.use("/api/homeSampleBooking", homeSampleBookingRoutes);
+app.use("/api/branches", branchRoutes);
+app.use("/api/aboutLaboratory", aboutLaboratoryRoutes);
+app.use("/api/laboratoryImages", laboratoryImageRoutes);
+app.use("/api/offers", offerRoutes);
+
+// Test route
+app.get("/api/test-about", (req, res) => {
+  res.json({ message: "Test route works" });
+});
 
 
 // ==================== ROOT ROUTE (Health Check) ====================
