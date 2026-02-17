@@ -22,6 +22,7 @@ import branchRoutes from "./routes/branchRoutes.js";
 import aboutLaboratoryRoutes from "./routes/aboutLaboratoryRoutes.js";
 import laboratoryImageRoutes from "./routes/laboratoryImageRoutes.js";
 import offerRoutes from "./routes/offerRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 
 
 // Load environment variables
@@ -83,6 +84,7 @@ app.use((req, res, next) => {
 
 // ==================== STATIC FILES (Uploads) ====================
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 // Subfolders ke liye specific routes
 app.use("/uploads/home", express.static(path.join(__dirname, "uploads/home")));
@@ -111,6 +113,7 @@ app.use("/api/branches", branchRoutes);
 app.use("/api/aboutLaboratory", aboutLaboratoryRoutes);
 app.use("/api/laboratoryImages", laboratoryImageRoutes);
 app.use("/api/offers", offerRoutes);
+app.use("/api/contact", contactRoutes);
 
 // Test route
 app.get("/api/test-about", (req, res) => {
