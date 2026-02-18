@@ -1,97 +1,219 @@
-import express from "express";
-import nodemailer from "nodemailer";
-import ContactInquiry from "../models/ContactInquiry.js";
+import express from 'express';
+import nodemailer from 'nodemailer';
+import ContactInquiry from '../models/ContactInquiry.js';
 
 const router = express.Router();
 
-// POST - Send Inquiry
-router.post("/send-inquiry", async (req, res) => {
+// Send contact form email
+router.post('/send-inquiry', async (req, res) => {
   try {
     const { name, email, mobile, reason } = req.body;
 
-    console.log("📧 Received inquiry:", { name, email, mobile, reason });
+    console.log('📧 Received inquiry:', { name, email, mobile, reason });
 
+    // Validate required fields
     if (!name || !email || !mobile) {
       return res.status(400).json({
         success: false,
-        message: "Please provide all required fields",
+        message: 'Please provide all required fields'
       });
     }
 
-    // Save to database
+    // Save to database first (fast response)
     const inquiry = new ContactInquiry({
       name,
       email,
       mobile,
-      reason: reason || "",
+      reason: reason || ''
     });
 
     await inquiry.save();
-    console.log("✅ Inquiry saved to database");
+    console.log('✅ Inquiry saved to database');
 
-    // Send email (await so we see errors)
-    await sendEmail(inquiry);
-
+    // Send immediate success response
     res.status(200).json({
       success: true,
-      message: "Inquiry sent successfully",
+      message: 'Inquiry sent successfully'
     });
-  } catch (error) {
-    console.error("❌ Error processing inquiry:", error);
 
+    // Send email in background (don't wait)
+    sendEmailInBackground(inquiry);
+
+  } catch (error) {
+    console.error('❌ Error processing inquiry:', error);
+    
     res.status(500).json({
       success: false,
-      message: "Failed to send inquiry",
-      error: error.message,
+      message: 'Failed to send inquiry. Please try again or call us directly.',
+      error: error.message
     });
   }
 });
 
-// Email Function
-async function sendEmail(inquiry) {
+// Function to send email in background
+async function sendEmailInBackground(inquiry) {
   try {
-    console.log("📤 Connecting to SMTP...");
+    console.log('📤 Sending email in background...');
 
     const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: 465,
-      secure: true, // REQUIRED for 465
+      service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD,
-      },
+        user: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
+        pass: process.env.EMAIL_PASSWORD || 'uqkculduqfldpmku'
+      }
     });
 
-    // Verify SMTP connection
-    await transporter.verify();
-    console.log("✅ SMTP connection verified");
-
     const mailOptions = {
-      from: process.env.EMAIL_FROM,
-      to: process.env.EMAIL_FROM,
-      subject: `🔬 New Test Booking - ${inquiry.name}`,
-      replyTo: inquiry.email,
+      from: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
+      to: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
+      subject: `🔬 New Test Booking Inquiry - ${inquiry.name}`,
       html: `
-        <h2>New Test Booking Inquiry</h2>
-        <p><strong>Name:</strong> ${inquiry.name}</p>
-        <p><strong>Email:</strong> ${inquiry.email}</p>
-        <p><strong>Mobile:</strong> ${inquiry.mobile}</p>
-        <p><strong>Reason:</strong> ${inquiry.reason || "N/A"}</p>
-        <p><strong>Time:</strong> ${new Date().toLocaleString("en-IN", {
-          timeZone: "Asia/Kolkata",
-        })}</p>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #07661B 0%, #0a8a24 100%); padding: 30px; text-align: center;">
+                      <h2 style="color: white; margin: 0; font-size: 24px;">
+                        🔬 New Test Booking Inquiry
+                      </h2>
+                    </td>
+                  </tr>
+
+                  <!-- Customer Details -->
+                  <tr>
+                    <td style="padding: 30px;">
+                      <h3 style="color: #07661B; margin: 0 0 20px 0; font-size: 18px; border-bottom: 2px solid #07661B; padding-bottom: 10px;">
+                        👤 Customer Details
+                      </h3>
+                      
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 15px;">
+                        <tr>
+                          <td style="padding: 12px; background-color: #f9f9f9; font-weight: bold; color: #333; width: 30%;">
+                            📝 Name:
+                          </td>
+                          <td style="padding: 12px; background-color: #f9f9f9; color: #555;">
+                            ${inquiry.name}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 12px; background-color: #ffffff; font-weight: bold; color: #333;">
+                            📧 Email:
+                          </td>
+                          <td style="padding: 12px; background-color: #ffffff;">
+                            <a href="mailto:${inquiry.email}" style="color: #07661B; text-decoration: none;">
+                              ${inquiry.email}
+                            </a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 12px; background-color: #f9f9f9; font-weight: bold; color: #333;">
+                            📱 Mobile:
+                          </td>
+                          <td style="padding: 12px; background-color: #f9f9f9;">
+                            <a href="tel:${inquiry.mobile}" style="color: #07661B; text-decoration: none; font-weight: 600;">
+                              ${inquiry.mobile}
+                            </a>
+                          </td>
+                        </tr>
+                        ${inquiry.reason ? `
+                        <tr>
+                          <td style="padding: 12px; background-color: #ffffff; font-weight: bold; color: #333; vertical-align: top;">
+                            💬 Reason:
+                          </td>
+                          <td style="padding: 12px; background-color: #ffffff; color: #555;">
+                            ${inquiry.reason}
+                          </td>
+                        </tr>
+                        ` : ''}
+                        <tr>
+                          <td style="padding: 12px; background-color: #f9f9f9; font-weight: bold; color: #333;">
+                            🕐 Time:
+                          </td>
+                          <td style="padding: 12px; background-color: #f9f9f9; color: #555;">
+                            ${new Date(inquiry.createdAt).toLocaleString('en-IN', { 
+                              timeZone: 'Asia/Kolkata',
+                              dateStyle: 'full',
+                              timeStyle: 'long'
+                            })}
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Action Box -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
+                        <tr>
+                          <td style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; border-radius: 5px;">
+                            <p style="margin: 0; color: #856404; font-size: 14px;">
+                              <strong>⚠️ Action Required:</strong><br>
+                              Please contact this customer as soon as possible to assist with their test booking inquiry.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Action Buttons -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
+                        <tr>
+                          <td align="center">
+                            <a href="tel:${inquiry.mobile}" style="display: inline-block; background: #07661B; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: 600; margin: 5px;">
+                              📞 Call Customer
+                            </a>
+                            <a href="mailto:${inquiry.email}" style="display: inline-block; background: #4472C4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: 600; margin: 5px;">
+                              ✉️ Email Customer
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background: #07661B; padding: 20px; text-align: center;">
+                      <p style="margin: 0 0 10px 0; color: white; font-size: 14px; font-weight: 600;">
+                        Parishrama Diagnostic Laboratory
+                      </p>
+                      <p style="margin: 0 0 10px 0; color: rgba(255,255,255,0.9); font-size: 12px;">
+                        #77, 1st Cross, MS Palya Circle, Vidyaranyapura Main Road<br>
+                        Bengaluru - 560 097
+                      </p>
+                      <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 12px;">
+                        📞 +91 9591035131 | 📧 parishramadiagnostics.123@gmail.com
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `,
+      replyTo: inquiry.email
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("✅ Email sent successfully:", info.response);
+    console.log('✅ Email sent successfully:', info.messageId);
 
+    // Update inquiry record
     inquiry.emailSent = true;
     inquiry.emailSentAt = new Date();
     await inquiry.save();
+
   } catch (error) {
-    console.error("❌ Email sending failed:", error);
-    throw error;
+    console.error('❌ Error sending email in background:', error.message);
+    // Don't throw - just log the error
   }
 }
 
