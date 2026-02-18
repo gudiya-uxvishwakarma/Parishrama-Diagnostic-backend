@@ -10,7 +10,7 @@ async function testPdfUpload() {
 
     // First, get or create a test appointment
     console.log('1️⃣ Fetching appointments...');
-    const appointmentsResponse = await fetch('https://parishrama-diagnostic-backend.onrender.com/api/appointments');
+    const appointmentsResponse = await fetch('http://localhost:5000/api/appointments');
     const appointmentsData = await appointmentsResponse.json();
     
     if (!appointmentsData.success || appointmentsData.data.length === 0) {
@@ -92,7 +92,7 @@ startxref
     formData.append('pdfReport', fs.createReadStream(testPdfPath));
 
     const uploadResponse = await fetch(
-      `https://parishrama-diagnostic-backend.onrender.com/api/appointments/${testAppointment._id}/upload-report`,
+      `http://localhost:5000/api/appointments/${testAppointment._id}/upload-report`,
       {
         method: 'POST',
         body: formData,
@@ -110,7 +110,7 @@ startxref
 
       // Test download
       console.log('4️⃣ Testing download...');
-      const downloadUrl = `https://parishrama-diagnostic-backend.onrender.com/api/appointments/${testAppointment._id}/download-report`;
+      const downloadUrl = `http://localhost:5000/api/appointments/${testAppointment._id}/download-report`;
       console.log(`Download URL: ${downloadUrl}`);
       
       const downloadResponse = await fetch(downloadUrl);
