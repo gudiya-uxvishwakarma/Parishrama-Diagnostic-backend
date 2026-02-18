@@ -56,7 +56,9 @@ async function sendEmailInBackground(inquiry) {
     console.log('📤 Sending email in background...');
 
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
         pass: process.env.EMAIL_PASSWORD || 'uqkculduqfldpmku'
