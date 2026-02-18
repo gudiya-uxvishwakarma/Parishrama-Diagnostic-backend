@@ -65,7 +65,7 @@ createUploadDirs();
 
 // Middlewares
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://parishrama-diagnostic.netlify.app','parishrama-diagnostic-laboratorys.netlify.app'],
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://parishrama-diagnostic.netlify.app','https://parishrama-diagnostic-laboratorys.netlify.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
