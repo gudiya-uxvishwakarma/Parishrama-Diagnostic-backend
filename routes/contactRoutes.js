@@ -1,5 +1,6 @@
 import express from 'express';
 import nodemailer from 'nodemailer';
+import ContactInquiry from '../models/ContactInquiry.js';
 
 const router = express.Router();
 
@@ -18,7 +19,42 @@ router.post('/send-inquiry', async (req, res) => {
       });
     }
 
-    // Create transporter with Gmail credentials
+    // Save to database first (fast response)
+    const inquiry = new ContactInquiry({
+      name,
+      email,
+      mobile,
+      reason: reason || ''
+    });
+
+    await inquiry.save();
+    console.log('✅ Inquiry saved to database');
+
+    // Send immediate success response
+    res.status(200).json({
+      success: true,
+      message: 'Inquiry sent successfully'
+    });
+
+    // Send email in background (don't wait)
+    sendEmailInBackground(inquiry);
+
+  } catch (error) {
+    console.error('❌ Error processing inquiry:', error);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send inquiry. Please try again or call us directly.',
+      error: error.message
+    });
+  }
+});
+
+// Function to send email in background
+async function sendEmailInBackground(inquiry) {
+  try {
+    console.log('📤 Sending email in background...');
+
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -27,11 +63,10 @@ router.post('/send-inquiry', async (req, res) => {
       }
     });
 
-    // Email content
     const mailOptions = {
       from: 'parishramadiagnostics.123@gmail.com',
       to: 'parishramadiagnostics.123@gmail.com',
-      subject: `🔬 New Test Booking Inquiry - ${name}`,
+      subject: `🔬 New Test Booking Inquiry - ${inquiry.name}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -67,7 +102,7 @@ router.post('/send-inquiry', async (req, res) => {
                             📝 Name:
                           </td>
                           <td style="padding: 12px; background-color: #f9f9f9; color: #555;">
-                            ${name}
+                            ${inquiry.name}
                           </td>
                         </tr>
                         <tr>
@@ -75,8 +110,8 @@ router.post('/send-inquiry', async (req, res) => {
                             📧 Email:
                           </td>
                           <td style="padding: 12px; background-color: #ffffff;">
-                            <a href="mailto:${email}" style="color: #07661B; text-decoration: none;">
-                              ${email}
+                            <a href="mailto:${inquiry.email}" style="color: #07661B; text-decoration: none;">
+                              ${inquiry.email}
                             </a>
                           </td>
                         </tr>
@@ -85,18 +120,18 @@ router.post('/send-inquiry', async (req, res) => {
                             📱 Mobile:
                           </td>
                           <td style="padding: 12px; background-color: #f9f9f9;">
-                            <a href="tel:${mobile}" style="color: #07661B; text-decoration: none; font-weight: 600;">
-                              ${mobile}
+                            <a href="tel:${inquiry.mobile}" style="color: #07661B; text-decoration: none; font-weight: 600;">
+                              ${inquiry.mobile}
                             </a>
                           </td>
                         </tr>
-                        ${reason ? `
+                        ${inquiry.reason ? `
                         <tr>
                           <td style="padding: 12px; background-color: #ffffff; font-weight: bold; color: #333; vertical-align: top;">
                             💬 Reason:
                           </td>
                           <td style="padding: 12px; background-color: #ffffff; color: #555;">
-                            ${reason}
+                            ${inquiry.reason}
                           </td>
                         </tr>
                         ` : ''}
@@ -105,7 +140,7 @@ router.post('/send-inquiry', async (req, res) => {
                             🕐 Time:
                           </td>
                           <td style="padding: 12px; background-color: #f9f9f9; color: #555;">
-                            ${new Date().toLocaleString('en-IN', { 
+                            ${new Date(inquiry.createdAt).toLocaleString('en-IN', { 
                               timeZone: 'Asia/Kolkata',
                               dateStyle: 'full',
                               timeStyle: 'long'
@@ -130,10 +165,10 @@ router.post('/send-inquiry', async (req, res) => {
                       <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
                         <tr>
                           <td align="center">
-                            <a href="tel:${mobile}" style="display: inline-block; background: #07661B; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: 600; margin: 5px;">
+                            <a href="tel:${inquiry.mobile}" style="display: inline-block; background: #07661B; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: 600; margin: 5px;">
                               📞 Call Customer
                             </a>
-                            <a href="mailto:${email}" style="display: inline-block; background: #4472C4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: 600; margin: 5px;">
+                            <a href="mailto:${inquiry.email}" style="display: inline-block; background: #4472C4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: 600; margin: 5px;">
                               ✉️ Email Customer
                             </a>
                           </td>
@@ -165,29 +200,21 @@ router.post('/send-inquiry', async (req, res) => {
         </body>
         </html>
       `,
-      replyTo: email
+      replyTo: inquiry.email
     };
 
-    // Send email
-    console.log('📤 Sending email...');
     const info = await transporter.sendMail(mailOptions);
     console.log('✅ Email sent successfully:', info.messageId);
 
-    res.status(200).json({
-      success: true,
-      message: 'Inquiry sent successfully'
-    });
+    // Update inquiry record
+    inquiry.emailSent = true;
+    inquiry.emailSentAt = new Date();
+    await inquiry.save();
 
   } catch (error) {
-    console.error('❌ Error sending email:', error);
-    console.error('Error details:', error.message);
-    
-    res.status(500).json({
-      success: false,
-      message: 'Failed to send inquiry. Please try again or call us directly.',
-      error: error.message
-    });
+    console.error('❌ Error sending email in background:', error.message);
+    // Don't throw - just log the error
   }
-});
+}
 
 export default router;
