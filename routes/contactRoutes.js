@@ -22,8 +22,8 @@ router.post('/send-inquiry', async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'parishramadiagnostics.123@gmail.com',
-        pass: 'uqkculduqfldpmku'
+        user: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
+        pass: process.env.EMAIL_PASSWORD || 'uqkculduqfldpmku'
       }
     });
 
@@ -38,8 +38,8 @@ router.post('/send-inquiry', async (req, res) => {
 
     // Email content with enhanced design
     const mailOptions = {
-      from: 'parishramadiagnostics.123@gmail.com',
-      to: 'parishramadiagnostics.123@gmail.com',
+      from: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
+      to: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
       subject: `🔬 New Test Booking Inquiry - ${name}`,
       html: `
         <!DOCTYPE html>
