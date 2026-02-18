@@ -65,7 +65,7 @@ createUploadDirs();
 
 // Middlewares
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://parishrama-diagnostic.netlify.app'],
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://parishrama-diagnostic.netlify.app','parishrama-diagnostic-laboratorys.netlify.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -145,7 +145,7 @@ connectDB();
 // ==================== Server Start ====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(` Server running on http://localhost:${PORT}`);
+  console.log(` Server running on https://parishrama-diagnostic-backend.onrender.com:${PORT}`);
   console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(` API Base URL: http://localhost:${PORT}/api`);
+  console.log(` API Base URL: https://parishrama-diagnostic-backend.onrender.com:${PORT}/api`);
 });

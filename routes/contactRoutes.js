@@ -18,28 +18,19 @@ router.post('/send-inquiry', async (req, res) => {
       });
     }
 
-    // Create transporter with App Password
+    // Create transporter with Gmail credentials
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
-        pass: process.env.EMAIL_PASSWORD || 'uqkculduqfldpmku'
+        user: 'parishramadiagnostics.123@gmail.com',
+        pass: 'uqkculduqfldpmku'
       }
     });
 
-    // Verify transporter configuration
-    try {
-      await transporter.verify();
-      console.log('✅ Email transporter verified successfully');
-    } catch (verifyError) {
-      console.error('❌ Email transporter verification failed:', verifyError.message);
-      throw new Error('Email service configuration error');
-    }
-
-    // Email content with enhanced design
+    // Email content
     const mailOptions = {
-      from: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
-      to: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
+      from: 'parishramadiagnostics.123@gmail.com',
+      to: 'parishramadiagnostics.123@gmail.com',
       subject: `🔬 New Test Booking Inquiry - ${name}`,
       html: `
         <!DOCTYPE html>
@@ -48,83 +39,72 @@ router.post('/send-inquiry', async (req, res) => {
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
-        <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif;">
           <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
             <tr>
               <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                   
-                  <!-- Header with Logo and Brand -->
+                  <!-- Header -->
                   <tr>
-                    <td style="background: linear-gradient(135deg, #07661B 0%, #0a8a24 100%); padding: 40px 30px; text-align: center;">
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td align="center">
-                            
-                          </td>
-                        </tr>
-                        <tr>
-                          <td align="center">
-                            <h2 style="color: white; margin: 0; font-size: 26px; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                              🔬 New Test Booking Inquiry
-                            </h2>
-                          </td>
-                        </tr>
-                      </table>
+                    <td style="background: linear-gradient(135deg, #07661B 0%, #0a8a24 100%); padding: 30px; text-align: center;">
+                      <h2 style="color: white; margin: 0; font-size: 24px;">
+                        🔬 New Test Booking Inquiry
+                      </h2>
                     </td>
                   </tr>
 
-                  <!-- Customer Details Section -->
+                  <!-- Customer Details -->
                   <tr>
-                    <td style="padding: 40px 30px; background-color: #fafafa;">
-                      <h3 style="color: #07661B; margin: 0 0 25px 0; font-size: 22px; font-weight: 700; border-bottom: 3px solid #07661B; padding-bottom: 12px; display: inline-block;">
+                    <td style="padding: 30px;">
+                      <h3 style="color: #07661B; margin: 0 0 20px 0; font-size: 18px; border-bottom: 2px solid #07661B; padding-bottom: 10px;">
                         👤 Customer Details
                       </h3>
                       
-                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 20px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 15px;">
                         <tr>
-                          <td style="padding: 16px 20px; background-color: #ffffff; border-bottom: 1px solid #e8e8e8; font-weight: 700; color: #333; width: 35%; font-size: 15px;">
+                          <td style="padding: 12px; background-color: #f9f9f9; font-weight: bold; color: #333; width: 30%;">
                             📝 Name:
                           </td>
-                          <td style="padding: 16px 20px; background-color: #ffffff; border-bottom: 1px solid #e8e8e8; color: #555; font-size: 15px;">
+                          <td style="padding: 12px; background-color: #f9f9f9; color: #555;">
                             ${name}
                           </td>
                         </tr>
                         <tr>
-                          <td style="padding: 16px 20px; background-color: #f9f9f9; border-bottom: 1px solid #e8e8e8; font-weight: 700; color: #333; font-size: 15px;">
+                          <td style="padding: 12px; background-color: #ffffff; font-weight: bold; color: #333;">
                             📧 Email:
                           </td>
-                          <td style="padding: 16px 20px; background-color: #f9f9f9; border-bottom: 1px solid #e8e8e8; font-size: 15px;">
-                            <a href="mailto:${email}" style="color: #07661B; text-decoration: none; font-weight: 600; transition: color 0.3s;">
+                          <td style="padding: 12px; background-color: #ffffff;">
+                            <a href="mailto:${email}" style="color: #07661B; text-decoration: none;">
                               ${email}
                             </a>
                           </td>
                         </tr>
                         <tr>
-                          <td style="padding: 16px 20px; background-color: #ffffff; border-bottom: 1px solid #e8e8e8; font-weight: 700; color: #333; font-size: 15px;">
+                          <td style="padding: 12px; background-color: #f9f9f9; font-weight: bold; color: #333;">
                             📱 Mobile:
                           </td>
-                          <td style="padding: 16px 20px; background-color: #ffffff; border-bottom: 1px solid #e8e8e8; font-size: 15px;">
-                            <a href="tel:${mobile}" style="color: #07661B; text-decoration: none; font-weight: 600; font-size: 16px;">
+                          <td style="padding: 12px; background-color: #f9f9f9;">
+                            <a href="tel:${mobile}" style="color: #07661B; text-decoration: none; font-weight: 600;">
                               ${mobile}
                             </a>
                           </td>
                         </tr>
                         ${reason ? `
                         <tr>
-                          <td style="padding: 16px 20px; background-color: #f9f9f9; border-bottom: 1px solid #e8e8e8; font-weight: 700; color: #333; font-size: 15px; vertical-align: top;">
+                          <td style="padding: 12px; background-color: #ffffff; font-weight: bold; color: #333; vertical-align: top;">
                             💬 Reason:
                           </td>
-                          <td style="padding: 16px 20px; background-color: #f9f9f9; border-bottom: 1px solid #e8e8e8; color: #555; font-size: 15px; line-height: 1.6;">
+                          <td style="padding: 12px; background-color: #ffffff; color: #555;">
                             ${reason}
                           </td>
                         </tr>
                         ` : ''}
                         <tr>
-                          <td style="padding: 16px 20px; background-color: #ffffff; font-weight: 700; color: #333; font-size: 15px;">
-                            🕐 Inquiry Time:
+                          <td style="padding: 12px; background-color: #f9f9f9; font-weight: bold; color: #333;">
+                            🕐 Time:
                           </td>
-                          <td style="padding: 16px 20px; background-color: #ffffff; color: #555; font-size: 15px;">
+                          <td style="padding: 12px; background-color: #f9f9f9; color: #555;">
                             ${new Date().toLocaleString('en-IN', { 
                               timeZone: 'Asia/Kolkata',
                               dateStyle: 'full',
@@ -134,36 +114,28 @@ router.post('/send-inquiry', async (req, res) => {
                         </tr>
                       </table>
 
-                      <!-- Action Required Box -->
-                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 30px;">
+                      <!-- Action Box -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
                         <tr>
-                          <td style="background: linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%); padding: 20px; border-left: 5px solid #ffc107; border-radius: 8px; box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);">
-                            <p style="margin: 0; color: #856404; font-size: 15px; line-height: 1.6;">
-                              <strong style="font-size: 16px;">⚠️ Action Required:</strong><br>
-                              Please contact this customer as soon as possible to assist with their test booking inquiry. Prompt response ensures excellent customer service.
+                          <td style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; border-radius: 5px;">
+                            <p style="margin: 0; color: #856404; font-size: 14px;">
+                              <strong>⚠️ Action Required:</strong><br>
+                              Please contact this customer as soon as possible to assist with their test booking inquiry.
                             </p>
                           </td>
                         </tr>
                       </table>
 
-                      <!-- Quick Action Buttons -->
-                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 25px;">
+                      <!-- Action Buttons -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
                         <tr>
                           <td align="center">
-                            <table cellpadding="0" cellspacing="0">
-                              <tr>
-                                <td style="padding: 0 10px;">
-                                  <a href="tel:${mobile}" style="display: inline-block; background: linear-gradient(135deg, #07661B 0%, #0a8a24 100%); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(7, 102, 27, 0.3);">
-                                    📞 Call Customer
-                                  </a>
-                                </td>
-                                <td style="padding: 0 10px;">
-                                  <a href="mailto:${email}" style="display: inline-block; background: linear-gradient(135deg, #4472C4 0%, #2e5cb8 100%); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(68, 114, 196, 0.3);">
-                                    ✉️ Email Customer
-                                  </a>
-                                </td>
-                              </tr>
-                            </table>
+                            <a href="tel:${mobile}" style="display: inline-block; background: #07661B; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: 600; margin: 5px;">
+                              📞 Call Customer
+                            </a>
+                            <a href="mailto:${email}" style="display: inline-block; background: #4472C4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: 600; margin: 5px;">
+                              ✉️ Email Customer
+                            </a>
                           </td>
                         </tr>
                       </table>
@@ -172,31 +144,17 @@ router.post('/send-inquiry', async (req, res) => {
 
                   <!-- Footer -->
                   <tr>
-                    <td style="background: linear-gradient(135deg, #07661B 0%, #0a8a24 100%); padding: 30px; text-align: center;">
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td align="center">
-                            <p style="margin: 0 0 10px 0; color: white; font-size: 14px; font-weight: 600;">
-                              Parishrama Diagnostic Laboratory
-                            </p>
-                            <p style="margin: 0 0 15px 0; color: rgba(255,255,255,0.9); font-size: 13px; line-height: 1.6;">
-                              #77, 1st Cross, MS Palya Circle, Vidyaranyapura Main Road<br>
-                              Bengaluru - 560 097
-                            </p>
-                            <p style="margin: 0 0 5px 0; color: rgba(255,255,255,0.9); font-size: 13px;">
-                              📞 <a href="tel:+919591035131" style="color: white; text-decoration: none; font-weight: 600;">+91 9591035131</a>
-                            </p>
-                            <p style="margin: 0 0 20px 0; color: rgba(255,255,255,0.9); font-size: 13px;">
-                              📧 <a href="mailto:parishramadiagnostics.123@gmail.com" style="color: white; text-decoration: none;">parishramadiagnostics.123@gmail.com</a>
-                            </p>
-                            <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 15px; margin-top: 15px;">
-                              <p style="margin: 0; color: rgba(255,255,255,0.8); font-size: 12px;">
-                                🤖 This email was sent automatically from the website popup form
-                              </p>
-                            </div>
-                          </td>
-                        </tr>
-                      </table>
+                    <td style="background: #07661B; padding: 20px; text-align: center;">
+                      <p style="margin: 0 0 10px 0; color: white; font-size: 14px; font-weight: 600;">
+                        Parishrama Diagnostic Laboratory
+                      </p>
+                      <p style="margin: 0 0 10px 0; color: rgba(255,255,255,0.9); font-size: 12px;">
+                        #77, 1st Cross, MS Palya Circle, Vidyaranyapura Main Road<br>
+                        Bengaluru - 560 097
+                      </p>
+                      <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 12px;">
+                        📞 +91 9591035131 | 📧 parishramadiagnostics.123@gmail.com
+                      </p>
                     </td>
                   </tr>
 
@@ -222,11 +180,7 @@ router.post('/send-inquiry', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error sending email:', error);
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      command: error.command
-    });
+    console.error('Error details:', error.message);
     
     res.status(500).json({
       success: false,
