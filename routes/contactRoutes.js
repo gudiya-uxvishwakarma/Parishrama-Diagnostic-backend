@@ -58,14 +58,14 @@ async function sendEmailInBackground(inquiry) {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'parishramadiagnostics.123@gmail.com',
-        pass: 'uqkculduqfldpmku'
+        user: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
+        pass: process.env.EMAIL_PASSWORD || 'uqkculduqfldpmku'
       }
     });
 
     const mailOptions = {
-      from: 'parishramadiagnostics.123@gmail.com',
-      to: 'parishramadiagnostics.123@gmail.com',
+      from: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
+      to: process.env.EMAIL_USERNAME || 'parishramadiagnostics.123@gmail.com',
       subject: `🔬 New Test Booking Inquiry - ${inquiry.name}`,
       html: `
         <!DOCTYPE html>
