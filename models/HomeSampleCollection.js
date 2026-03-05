@@ -11,13 +11,13 @@ const homeSampleCollectionSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  description: {
-    type: String,
-    required: true,
-    trim: true
+  packageDetails: {
+    type: [String],
+    default: []
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 export default mongoose.model('HomeSampleCollection', homeSampleCollectionSchema);

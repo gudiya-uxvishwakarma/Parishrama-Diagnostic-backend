@@ -45,19 +45,21 @@ export const getServiceById = async (req, res) => {
 // Create new service
 export const createService = async (req, res) => {
   try {
-    const { title, price, description } = req.body;
+    const { title, price, packageDetails } = req.body;
 
-    if (!title || !price || !description) {
+    console.log('Received data:', { title, price, packageDetails });
+
+    if (!title || !price) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide title, price, and description'
+        message: 'Please provide title and price'
       });
     }
 
     const service = new HomeSampleCollection({
       title,
       price,
-      description
+      packageDetails: Array.isArray(packageDetails) ? packageDetails : []
     });
 
     await service.save();
@@ -80,11 +82,19 @@ export const createService = async (req, res) => {
 // Update service
 export const updateService = async (req, res) => {
   try {
-    const { title, price, description } = req.body;
+    const { title, price, packageDetails } = req.body;
+
+    console.log('Update data:', { title, price, packageDetails });
+
+    const updateData = {
+      title,
+      price,
+      packageDetails: Array.isArray(packageDetails) ? packageDetails : []
+    };
 
     const service = await HomeSampleCollection.findByIdAndUpdate(
       req.params.id,
-      { title, price, description },
+      updateData,
       { new: true, runValidators: true }
     );
 
