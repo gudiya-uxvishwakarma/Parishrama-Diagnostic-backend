@@ -23,6 +23,8 @@ import aboutLaboratoryRoutes from "./routes/aboutLaboratoryRoutes.js";
 import laboratoryImageRoutes from "./routes/laboratoryImageRoutes.js";
 import offerRoutes from "./routes/offerRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import contactInfoRoutes from "./routes/contactInfo.js";
+import workingHoursRoutes from "./routes/workingHours.js";
 
 
 // Load environment variables
@@ -114,6 +116,8 @@ app.use("/api/aboutLaboratory", aboutLaboratoryRoutes);
 app.use("/api/laboratoryImages", laboratoryImageRoutes);
 app.use("/api/offers", offerRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/contactInfo", contactInfoRoutes);
+app.use("/api/workingHours", workingHoursRoutes);
 
 // Test route
 app.get("/api/test-about", (req, res) => {
@@ -145,7 +149,7 @@ connectDB();
 // ==================== Server Start ====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(` Server running on https://parishrama-diagnostic-backend-1.onrender.com:${PORT}`);
+  console.log(` Server running on http://localhost:5000:${PORT}`);
   console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(` API Base URL: https://parishrama-diagnostic-backend-1.onrender.com:${PORT}/api`);
+  console.log(` API Base URL: http://localhost:5000:${PORT}/api`);
 });
