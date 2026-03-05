@@ -6,10 +6,15 @@ const workingHoursSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  hours: {
+  morningHours: {
     type: String,
-    required: true,
-    trim: true
+    trim: true,
+    default: ''
+  },
+  eveningHours: {
+    type: String,
+    trim: true,
+    default: ''
   },
   order: {
     type: Number,

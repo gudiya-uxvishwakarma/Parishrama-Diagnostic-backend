@@ -45,18 +45,19 @@ export const getWorkingHourById = async (req, res) => {
 // Create new working hour
 export const createWorkingHour = async (req, res) => {
   try {
-    const { day, hours, order } = req.body;
+    const { day, morningHours, eveningHours, order } = req.body;
 
-    if (!day || !hours) {
+    if (!day) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide day and hours'
+        message: 'Please provide day'
       });
     }
 
     const workingHour = new WorkingHours({
       day,
-      hours,
+      morningHours: morningHours || '',
+      eveningHours: eveningHours || '',
       order: order || 0
     });
 
@@ -80,11 +81,11 @@ export const createWorkingHour = async (req, res) => {
 // Update working hour
 export const updateWorkingHour = async (req, res) => {
   try {
-    const { day, hours, order } = req.body;
+    const { day, morningHours, eveningHours, order } = req.body;
 
     const workingHour = await WorkingHours.findByIdAndUpdate(
       req.params.id,
-      { day, hours, order },
+      { day, morningHours, eveningHours, order },
       { new: true, runValidators: true }
     );
 
