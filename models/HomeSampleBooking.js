@@ -35,6 +35,16 @@ const homeSampleBookingSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  doctorName: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  doctorSpecialization: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   pdfReport: {
     type: String,
     default: null

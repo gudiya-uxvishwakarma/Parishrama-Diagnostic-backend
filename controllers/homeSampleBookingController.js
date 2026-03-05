@@ -51,7 +51,7 @@ export const getBookingById = async (req, res) => {
 // Create new booking
 export const createBooking = async (req, res) => {
   try {
-    const { name, email, phone, address, date, time, testType } = req.body;
+    const { name, email, phone, address, date, time, testType, doctorName, doctorSpecialization } = req.body;
 
     if (!name || !email || !phone || !address || !date || !time || !testType) {
       return res.status(400).json({
@@ -67,7 +67,9 @@ export const createBooking = async (req, res) => {
       address,
       date,
       time,
-      testType
+      testType,
+      doctorName: doctorName || '',
+      doctorSpecialization: doctorSpecialization || ''
     });
 
     await booking.save();
@@ -90,11 +92,11 @@ export const createBooking = async (req, res) => {
 // Update booking
 export const updateBooking = async (req, res) => {
   try {
-    const { name, email, phone, address, date, time, testType } = req.body;
+    const { name, email, phone, address, date, time, testType, doctorName, doctorSpecialization } = req.body;
 
     const booking = await HomeSampleBooking.findByIdAndUpdate(
       req.params.id,
-      { name, email, phone, address, date, time, testType },
+      { name, email, phone, address, date, time, testType, doctorName, doctorSpecialization },
       { new: true, runValidators: true }
     );
 
