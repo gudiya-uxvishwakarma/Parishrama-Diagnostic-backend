@@ -149,7 +149,7 @@ connectDB();
 // ==================== Server Start ====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(` Server running on https://parishrama-diagnostic-backend-1.onrender.com:${PORT}`);
+  console.log(` Server running on https://parishramadiagnostic.com:${PORT}`);
   console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(` API Base URL: https://parishrama-diagnostic-backend-1.onrender.com:${PORT}/api`);
+  console.log(` API Base URL: https://parishramadiagnostic.com:${PORT}/api`);
 });

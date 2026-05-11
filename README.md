@@ -217,7 +217,7 @@ pm2 save
 npm test
 
 # Test API endpoints
-curl https://parishrama-diagnostic-backend-1.onrender.com/api/health
+curl https://parishramadiagnostic.com/api/health
 ```
 
 ## 📈 Monitoring
